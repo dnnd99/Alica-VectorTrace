@@ -16,7 +16,7 @@ function-nya lokal:
 
 ```bash
 npm install -g netlify-cli
-cd netlify/functions && npm install && cd ../..
+npm install
 netlify dev
 ```
 
@@ -38,8 +38,9 @@ gh repo create icon-vectorizer --public --source=. --push
 2. Connect ke GitHub, pilih repo `icon-vectorizer`
 3. Build settings kebaca otomatis dari `netlify.toml` (nggak ada build command,
    langsung publish static files + auto-detect function di `netlify/functions`)
-4. Deploy. Netlify otomatis install dependency di `netlify/functions/package.json`
-   dan compile function-nya. Setiap push ke `main` auto-redeploy.
+4. Deploy. Dependency `@neplex/vectorizer` ada di `package.json` root (bukan
+   di folder function) — ini emang required sama Netlify biar ke-install
+   otomatis pas build. Setiap push ke `main` auto-redeploy.
 
 ## Cara kerja
 
