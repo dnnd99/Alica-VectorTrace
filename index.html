@@ -9,20 +9,26 @@
 <body>
   <div class="wrap">
     <h1>Icon Vectorizer</h1>
-    <p class="sub">Convert PNG/JPG jadi SVG langsung di browser. Nggak upload ke server, nggak ada limit.</p>
+    <p class="sub">Convert PNG/JPG jadi SVG full color. Self-hosted, nggak ada limit akun.</p>
 
     <label class="dropzone" id="dropzone">
       <input type="file" id="fileInput" accept="image/png,image/jpeg" multiple hidden />
       <span id="dropLabel">Klik atau drag gambar ke sini (bisa multiple)</span>
     </label>
 
-    <p class="note">Mode saat ini: line-art / single-color trace (cocok buat icon flat, line art, logo mono). Full multi-color trace butuh setup tambahan — lihat README.</p>
     <div class="controls">
+      <label>Color Precision
+        <input type="range" id="colorPrecision" min="1" max="8" value="6" />
+      </label>
       <label>Filter Speckle
         <input type="range" id="filterSpeckle" min="0" max="16" value="4" />
       </label>
       <label>Corner Threshold
         <input type="range" id="cornerThreshold" min="0" max="180" value="60" />
+      </label>
+      <label class="checkbox">
+        <input type="checkbox" id="bwMode" />
+        Black & White mode (buat line art)
       </label>
     </div>
 

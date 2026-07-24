@@ -1,19 +1,13 @@
-import { BinaryImageConverter } from "vectortracer";
-// NOTE: versi npm "vectortracer" yang published (0.1.2) baru expose
-// BinaryImageConverter (line-art / single-color trace). Kalau butuh full
-// multi-color vectorization, opsi: (a) fork repo & build ColorImageConverter
-// sendiri dari source (https://github.com/AlansCodeLog/vectortracer), atau
-// (b) pindah ke pendekatan Netlify Function + @neplex/vectorizer (Node
-// binding VTracer, full color) — lihat README bagian "Full color mode".
-
 const fileInput = document.getElementById("fileInput");
 const dropzone = document.getElementById("dropzone");
-const dropLabel = document.getElementById("dropLabel");
-const statusEl = document.getElementById("status");
 const resultsEl = document.getElementById("results");
 
+const colorPrecisionEl = document.getElementById("colorPrecision");
 const filterSpeckleEl = document.getElementById("filterSpeckle");
 const cornerThresholdEl = document.getElementById("cornerThreshold");
+const bwModeEl = document.getElementById("bwMode");
+
+const FUNCTION_URL = "/.netlify/functions/vectorize";
 
 dropzone.addEventListener("dragover", (e) => e.preventDefault());
 dropzone.addEventListener("drop", (e) => {
@@ -41,53 +35,37 @@ async function handleFiles(fileList) {
 }
 
 async function traceFile(file) {
-  const imageData = await fileToImageData(file);
+  const imageBase64 = await fileToBase64(file);
 
-  const opts = {
-    debug: false,
-    mode: "spline",
-    cornerThreshold: Number(cornerThresholdEl.value),
-    filterSpeckle: Number(filterSpeckleEl.value),
-    lengthThreshold: 5,
-    spliceThreshold: 45,
-    maxIterations: 2,
-    pathPrecision: 5
-  };
-
-  const converter = new BinaryImageConverter(imageData, opts, {
-    invert: false,
-    pathFill: "#000000",
-    backgroundColor: undefined,
-    attributes: undefined
+  const res = await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      imageBase64,
+      options: {
+        colorPrecision: Number(colorPrecisionEl.value),
+        filterSpeckle: Number(filterSpeckleEl.value),
+        cornerThreshold: Number(cornerThresholdEl.value),
+        blackWhite: bwModeEl.checked
+      }
+    })
   });
 
-  // MUST call init() before the tick loop, or getResult() comes back empty
-  converter.init();
-
-  let done = false;
-  while (!done) {
-    done = converter.tick();
-    await new Promise((r) => setTimeout(r, 0));
-  }
-  const result = converter.getResult();
-  converter.free();
-  return result;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Server error");
+  return data.svg;
 }
 
-function fileToImageData(file) {
+function fileToBase64(file) {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-      resolve(ctx.getImageData(0, 0, canvas.width, canvas.height));
-      URL.revokeObjectURL(img.src);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      const base64 = result.split(",")[1];
+      resolve(base64);
     };
-    img.onerror = reject;
-    img.src = URL.createObjectURL(file);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 }
 

@@ -1,0 +1,8 @@
+{
+  "name": "vectorize-function",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@neplex/vectorizer": "^0.1.0"
+  }
+}
