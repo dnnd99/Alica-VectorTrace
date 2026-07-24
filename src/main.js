@@ -7,7 +7,25 @@ const filterSpeckleEl = document.getElementById("filterSpeckle");
 const cornerThresholdEl = document.getElementById("cornerThreshold");
 const bwModeEl = document.getElementById("bwMode");
 
-const FUNCTION_URL = "/.netlify/functions/vectorize";
+const engineEl = document.getElementById("engine");
+const vaiModeEl = document.getElementById("vaiMode");
+const vtracerControlsEl = document.getElementById("vtracerControls");
+const vtracerNoteEl = document.getElementById("vtracerNote");
+const vectorizerAiControlsEl = document.getElementById("vectorizerAiControls");
+const vectorizerAiNoteEl = document.getElementById("vectorizerAiNote");
+
+const FUNCTION_URLS = {
+  vtracer: "/.netlify/functions/vectorize",
+  vectorizerai: "/.netlify/functions/vectorize-ai"
+};
+
+engineEl.addEventListener("change", () => {
+  const isAi = engineEl.value === "vectorizerai";
+  vtracerControlsEl.hidden = isAi;
+  vtracerNoteEl.hidden = isAi;
+  vectorizerAiControlsEl.hidden = !isAi;
+  vectorizerAiNoteEl.hidden = !isAi;
+});
 
 dropzone.addEventListener("dragover", (e) => e.preventDefault());
 dropzone.addEventListener("drop", (e) => {
@@ -36,19 +54,23 @@ async function handleFiles(fileList) {
 
 async function traceFile(file) {
   const imageBase64 = await fileToBase64(file);
+  const engine = engineEl.value;
+  const url = FUNCTION_URLS[engine];
 
-  const res = await fetch(FUNCTION_URL, {
+  const options =
+    engine === "vectorizerai"
+      ? { mode: vaiModeEl.value }
+      : {
+          colorPrecision: Number(colorPrecisionEl.value),
+          filterSpeckle: Number(filterSpeckleEl.value),
+          cornerThreshold: Number(cornerThresholdEl.value),
+          blackWhite: bwModeEl.checked
+        };
+
+  const res = await fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      imageBase64,
-      options: {
-        colorPrecision: Number(colorPrecisionEl.value),
-        filterSpeckle: Number(filterSpeckleEl.value),
-        cornerThreshold: Number(cornerThresholdEl.value),
-        blackWhite: bwModeEl.checked
-      }
-    })
+    body: JSON.stringify({ imageBase64, options })
   });
 
   const data = await res.json();

@@ -17,11 +17,20 @@
     </label>
 
     <div class="controls">
+      <label>Engine
+        <select id="engine">
+          <option value="vtracer">VTracer (lokal, gratis, unlimited)</option>
+          <option value="vectorizerai">Vectorizer.ai (API resmi, kualitas lebih bagus, kena kredit/berbayar)</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="controls" id="vtracerControls">
       <label>Color Precision
-        <input type="range" id="colorPrecision" min="1" max="8" value="6" />
+        <input type="range" id="colorPrecision" min="1" max="8" value="4" />
       </label>
       <label>Filter Speckle
-        <input type="range" id="filterSpeckle" min="0" max="16" value="4" />
+        <input type="range" id="filterSpeckle" min="0" max="32" value="10" />
       </label>
       <label>Corner Threshold
         <input type="range" id="cornerThreshold" min="0" max="180" value="60" />
@@ -31,6 +40,17 @@
         Black & White mode (buat line art)
       </label>
     </div>
+    <p class="note" id="vtracerNote">Gambar dengan gradasi/shading atau format JPEG gampang "pecah" jadi banyak path kecil. Kalau masih pecah: turunin Color Precision lebih rendah, naikin Filter Speckle lebih tinggi.</p>
+
+    <div class="controls" id="vectorizerAiControls" hidden>
+      <label>Mode
+        <select id="vaiMode">
+          <option value="production">Production (kena kredit penuh)</option>
+          <option value="test">Test (gratis, tapi hasil ada watermark — buat coba-coba doang)</option>
+        </select>
+      </label>
+    </div>
+    <p class="note" id="vectorizerAiNote" hidden>Pakai API resmi Vectorizer.ai. Butuh API ID + API Secret yang di-set sebagai environment variable <code>VECTORIZER_API_ID</code> dan <code>VECTORIZER_API_SECRET</code> di Netlify (Site settings → Environment variables), diambil dari akun vectorizer.ai lo. Mode "test" gratis buat nyoba tapi hasilnya ada watermark; "production" motong kredit beneran.</p>
 
     <div id="status" class="status"></div>
     <div id="results" class="results"></div>

@@ -150,3 +150,9 @@ h1 { margin-bottom: 4px; }
   max-height: 70vh;
   pointer-events: none;
 }
+
+.note {
+  color: var(--muted);
+  font-size: 13px;
+  margin: -12px 0 20px;
+}
