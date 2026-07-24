@@ -80,12 +80,107 @@ function createResultCard(name) {
       const url = URL.createObjectURL(blob);
       const outName = filename.replace(/\.[^.]+$/, "") + ".svg";
       el.querySelector(".card-body").innerHTML = `
-        <div class="preview">${svg}</div>
+        <div class="preview" title="Klik buat perbesar">${svg}</div>
         <a class="download" href="${url}" download="${outName}">Download SVG</a>
       `;
+      el.querySelector(".preview").addEventListener("click", () => openLightbox(svg));
     },
     showError(msg) {
       el.querySelector(".card-body").innerHTML = `<div class="error">${msg}</div>`;
     }
   };
 }
+
+// ---- Lightbox: fullscreen preview with zoom + pan ----
+const lightbox = document.createElement("div");
+lightbox.className = "lightbox";
+lightbox.innerHTML = `
+  <div class="lightbox-toolbar">
+    <button id="lbZoomOut" title="Zoom out">−</button>
+    <span id="lbZoomLevel">100%</span>
+    <button id="lbZoomIn" title="Zoom in">+</button>
+    <button id="lbReset" title="Reset">Reset</button>
+    <button id="lbClose" title="Close">✕</button>
+  </div>
+  <div class="lightbox-stage">
+    <div class="lightbox-content"></div>
+  </div>
+`;
+document.body.appendChild(lightbox);
+
+const lbContent = lightbox.querySelector(".lightbox-content");
+const lbStage = lightbox.querySelector(".lightbox-stage");
+const lbZoomLevel = lightbox.querySelector("#lbZoomLevel");
+
+let scale = 1;
+let originX = 0;
+let originY = 0;
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+
+function applyTransform() {
+  lbContent.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
+  lbZoomLevel.textContent = Math.round(scale * 100) + "%";
+}
+
+function openLightbox(svg) {
+  lbContent.innerHTML = svg;
+  scale = 1;
+  originX = 0;
+  originY = 0;
+  applyTransform();
+  lightbox.classList.add("open");
+}
+
+function closeLightbox() {
+  lightbox.classList.remove("open");
+  lbContent.innerHTML = "";
+}
+
+lightbox.querySelector("#lbClose").addEventListener("click", closeLightbox);
+lightbox.addEventListener("click", (e) => {
+  if (e.target === lightbox) closeLightbox();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && lightbox.classList.contains("open")) closeLightbox();
+});
+
+lightbox.querySelector("#lbZoomIn").addEventListener("click", () => {
+  scale = Math.min(scale * 1.25, 10);
+  applyTransform();
+});
+lightbox.querySelector("#lbZoomOut").addEventListener("click", () => {
+  scale = Math.max(scale / 1.25, 0.1);
+  applyTransform();
+});
+lightbox.querySelector("#lbReset").addEventListener("click", () => {
+  scale = 1;
+  originX = 0;
+  originY = 0;
+  applyTransform();
+});
+
+lbStage.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const delta = e.deltaY < 0 ? 1.1 : 0.9;
+  scale = Math.min(Math.max(scale * delta, 0.1), 10);
+  applyTransform();
+}, { passive: false });
+
+lbStage.addEventListener("mousedown", (e) => {
+  isDragging = true;
+  dragStartX = e.clientX - originX;
+  dragStartY = e.clientY - originY;
+  lbStage.classList.add("dragging");
+});
+window.addEventListener("mousemove", (e) => {
+  if (!isDragging) return;
+  originX = e.clientX - dragStartX;
+  originY = e.clientY - dragStartY;
+  applyTransform();
+});
+window.addEventListener("mouseup", () => {
+  isDragging = false;
+  lbStage.classList.remove("dragging");
+});
