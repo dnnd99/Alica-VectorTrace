@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Icon Vectorizer — PNG/JPG to SVG</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <h1>Icon Vectorizer</h1>
+    <p class="sub">Convert PNG/JPG jadi SVG langsung di browser. Nggak upload ke server, nggak ada limit.</p>
+
+    <label class="dropzone" id="dropzone">
+      <input type="file" id="fileInput" accept="image/png,image/jpeg" multiple hidden />
+      <span id="dropLabel">Klik atau drag gambar ke sini (bisa multiple)</span>
+    </label>
+
+    <p class="note">Mode saat ini: line-art / single-color trace (cocok buat icon flat, line art, logo mono). Full multi-color trace butuh setup tambahan — lihat README.</p>
+    <div class="controls">
+      <label>Filter Speckle
+        <input type="range" id="filterSpeckle" min="0" max="16" value="4" />
+      </label>
+      <label>Corner Threshold
+        <input type="range" id="cornerThreshold" min="0" max="180" value="60" />
+      </label>
+    </div>
+
+    <div id="status" class="status"></div>
+    <div id="results" class="results"></div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
