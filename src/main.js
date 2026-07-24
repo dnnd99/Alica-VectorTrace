@@ -61,7 +61,9 @@ async function traceFile(file) {
     attributes: undefined
   });
 
-  // tick loop — keeps the UI thread responsive
+  // MUST call init() before the tick loop, or getResult() comes back empty
+  converter.init();
+
   let done = false;
   while (!done) {
     done = converter.tick();
